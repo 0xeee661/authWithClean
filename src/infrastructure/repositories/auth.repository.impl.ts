@@ -1,4 +1,9 @@
-import { AuthDataSources, AuthRepository, RegisterUserDto, UserEntity } from "../../domain/index.js";
+import { 
+  AuthDataSources, 
+  AuthRepository, 
+  LoginUserDto, 
+  RegisterUserDto, 
+  UserEntity } from "../../domain/index.js";
 
 export class AuthRepositoryImpl implements AuthRepository{
 
@@ -8,6 +13,10 @@ export class AuthRepositoryImpl implements AuthRepository{
 
   registerUser(registerUserDto: RegisterUserDto): Promise<UserEntity> {
     return this.authDataSource.registerUser(registerUserDto);
+  }
+
+  login(loginUserDto: LoginUserDto): Promise<UserEntity> {
+    return this.authDataSource.login(loginUserDto);
   }
 
 }

@@ -1,6 +1,6 @@
-import { BcryptAdapter } from "../../config/bcrypt.js";
+import { BcryptAdapter } from "../../config/index.js";
 import { UserModel } from "../../data/mongodb/index.js";
-import { CustomErrors, AuthDataSources, RegisterUserDto, UserEntity } from "../../domain/index.js";
+import { CustomErrors, AuthDataSources, RegisterUserDto, UserEntity, LoginUserDto } from "../../domain/index.js";
 import { UserMapper } from "../mapper/user.mapper.js";
 
 type  hashPassword = (password: string) => string;
@@ -29,6 +29,23 @@ export class AuthDataSourceImpl implements AuthDataSources {
       return UserMapper.userEntityForm(user);
 
       
+    } catch (error) {
+      if( error instanceof CustomErrors ) throw error;
+      throw CustomErrors.internal();
+    }
+  }
+
+  async login(loginUserDto: LoginUserDto): Promise<UserEntity> {
+    try {
+      const { email, password } = loginUserDto;
+      //1 Validation if the mail exists on DB
+      const userExists = await UserModel.findOne({ email: email });
+      if(!userExists) throw CustomErrors.badRequest("User not found");
+      
+      const isPasswordValid = this.comparePassword(password, userExists.password);
+      if(!isPasswordValid) throw CustomErrors.badRequest("Invalid password");
+      
+      return UserMapper.userEntityForm(userExists);
     } catch (error) {
       if( error instanceof CustomErrors ) throw error;
       throw CustomErrors.internal();
